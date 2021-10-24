@@ -63,4 +63,4 @@ class OTP(models.Model):
         User, on_delete=models.CASCADE, blank=True, null=True, related_name="OTP")
 
     def __str__(self):
-        return f"{self.profile.user.username}"
+        return f"{self.user.phone_number}"
