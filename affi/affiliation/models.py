@@ -15,8 +15,8 @@ class Affiliation(models.Model):
             ['affiliator', 'related_shop']
         ]
 
-    def __str__(self) -> str:
-        return f"{self.affiliator.user.name}, {self.related_shop.user.name}"
+    # def __str__(self) -> str:
+    #     return f"{self.affiliator.user.name}, {self.related_shop.user.name}"
 
 
 class Order(models.Model):
