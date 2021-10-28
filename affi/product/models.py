@@ -126,9 +126,9 @@ class Product(models.Model):
     tags = models.ManyToManyField("product.Tag", blank=True)
     menu_order = models.IntegerField(blank=True, null=True)
     affiliate_rate = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)], blank=True, null=True)
+        validators=[MinValueValidator(0), MaxValueValidator(100)], default=0.0)
     related_shop = models.ForeignKey(
-        "shop.Shop", on_delete=models.CASCADE, related_name="products", default=0)
+        "shop.Shop", on_delete=models.CASCADE, null=True, related_name="products")
 
     class Meta:
         unique_together = [
