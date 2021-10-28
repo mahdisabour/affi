@@ -20,7 +20,9 @@ def get_products_by_order(shop_id, base_order_id, order_id):
     )
     try:
         data = wcapi.get(f"orders/{base_order_id}").json()
-    except:
+    except Exception as e:
+        print(e)
+        print("tiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiir")
         return None
     status = data["status"]
     line_items = data["line_items"]
