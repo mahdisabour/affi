@@ -4,33 +4,33 @@ from graphql_jwt.decorators import login_required
 
 from ...affiliation.models import Affiliation, Order
 from ...user.models import Aff
-from ...product.models import Product
+from ...shop.models import Shop
 from ...core.models import User
 
 
 class RequestAffiliationUrl(graphene.Mutation):
     class Arguments:
         aff_user_id = graphene.Int()
-        product_id = graphene.Int()
+        shop_id = graphene.Int()
 
     status = graphene.String()
     error = graphene.String()
     affiliation_url = graphene.String()
 
     @login_required
-    def mutate(self, info, aff_user_id, product_id):
+    def mutate(self, info, aff_user_id, shop_id):
         user = User.objects.get(id=aff_user_id)
         if user.role != "AFF":
             return RequestAffiliationUrl(status="Failed", error="User is not Affiliator")
         affiliator = Aff.objects.get(user__pk=aff_user_id)
-        product = Product.objects.get(id=product_id)
-        affiliation = Affiliation.objects.filter(affiliator=affiliator, related_product=product) 
+        shop = Shop.objects.get(id=shop_id)
+        affiliation = Affiliation.objects.filter(affiliator=affiliator, related_shop=shop) 
         if affiliation.exists():
             affiliation = affiliation.first()
         else:
             affiliation = Affiliation.objects.create(
                 affiliator=affiliator,
-                related_product=product
+                related_shop=shop
             )
         return RequestAffiliationUrl(status="Success", affiliation_url=affiliation.affiliation_url)
 

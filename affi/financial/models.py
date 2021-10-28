@@ -19,6 +19,17 @@ class Transaction(models.Model):
         Wallet, on_delete=models.CASCADE, related_name="transactions")
     destination = models.ForeignKey(
         Wallet, on_delete=models.CASCADE)
-    amount = models.PositiveIntegerField()
-    # transaction_state = models.CharField(
-    #     max_length=50, choices=TransactionType.CHOICES, default=TransactionState.PENDING)
+    related_order = models.OneToOneField(
+        "affiliation.Order", on_delete=models.CASCADE, null=True, blank=True)
+    transaction_state = models.CharField(
+        max_length=50, choices=TransactionState.CHOICES, default=TransactionState.PENDING)
+
+    @property
+    def amount(self):
+        products = self.related_order.related_products.all()
+        amount = 0
+        for product in products:
+            affiliation_price = int(
+                (product.price)*(product.affiliate_rate / 100))
+            amount = amount + affiliation_price
+        return amount

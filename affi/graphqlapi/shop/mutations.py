@@ -28,7 +28,7 @@ class CreateShop(graphene.Mutation):
         user.save()
 
         Shop.objects.create(
-            user=user, 
+            user=user,
             url=kwargs.get("url")
         )
         return CreateShop(status="success")
@@ -74,8 +74,9 @@ class RateShop(graphene.Mutation):
     @login_required
     def mutate(self, info, rate, shop_id):
         if Aff.objects.filter(user__phone_number=info.context.user.phone_number).exists():
-            aff = Aff.objects.filter(user__phone_number=info.context.user.phone_number).first()
-        else: 
+            aff = Aff.objects.filter(
+                user__phone_number=info.context.user.phone_number).first()
+        else:
             return RateShop("you are not aff user")
         shop = Shop.objects.get(id=shop_id)
         if ShopRate.objects.filter(aff=aff, shop=shop).exists():
@@ -84,14 +85,28 @@ class RateShop(graphene.Mutation):
             shop_rate.save()
         else:
             ShopRate.objects.create(
-                aff= aff,
+                aff=aff,
                 shop=shop,
                 rate=rate
             )
         return RateShop(status="success")
 
 
+class UpdateShopProductsAffiliationRate(graphene.Mutation):
+    class Arguments:
+        affiliation_rate = graphene.Float()
+
+    status = graphene.String()
+
+    @login_required
+    def mutate(self, info, affiliation_rate):
+        shop = Shop.objects.get(user=info.context.user)
+        shop.products.all().update(affiliate_rate=affiliation_rate)
+        return UpdateShopProductsAffiliationRate(status="Success")
+
+
 class ShopMutation(graphene.ObjectType):
     create_shop = CreateShop.Field()
     rate_shop = RateShop.Field()
     update_shop = UpdateShop.Field()
+    update_shop_products_affiliation_rate = UpdateShopProductsAffiliationRate.Field()

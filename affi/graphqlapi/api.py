@@ -12,6 +12,7 @@ from .user.mutations import UserMutation
 from .shop.mutations import ShopMutation
 from .affiliation.mutations import AffiliationMutations
 from .financial.mutations import FinancialMutation
+from .product.mutations import ProductMutations
 
 
 class Query(
@@ -32,6 +33,7 @@ class Mutation(
     ShopMutation,
     AffiliationMutations,
     FinancialMutation,
+    ProductMutations,
     graphene.ObjectType
 ):
     pass

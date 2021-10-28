@@ -1,3 +1,4 @@
+from time import sleep
 
 import graphene
 from graphene_django import DjangoObjectType
