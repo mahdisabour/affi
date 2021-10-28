@@ -7,7 +7,7 @@ from ..shop.models import Shop
 from ..product.models import Product
 from ..affiliation.models import Order
 
-# @app.task
+@app.task
 def get_products_by_order(shop_id, base_order_id, order_id):
     shop = Shop.objects.get(id=shop_id)
     wcapi = API(
