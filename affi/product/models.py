@@ -128,7 +128,7 @@ class Product(models.Model):
     affiliate_rate = models.FloatField(
         validators=[MinValueValidator(0), MaxValueValidator(100)], blank=True, null=True)
     related_shop = models.ForeignKey(
-        "shop.Shop", on_delete=models.CASCADE, null=True, related_name="products")
+        "shop.Shop", on_delete=models.CASCADE, related_name="products", default=0)
 
     class Meta:
         unique_together = [
