@@ -26,7 +26,7 @@ def get_order_products(sender, instance, created, **kwargs):
         order_id = instance.id
         shop_id = instance.related_affiliation.related_shop.id
         base_order_id = instance.base_order_id
-        get_order_products.apply_async((shop_id, base_order_id, order_id, ))
+        get_products_by_order.apply_async((shop_id, base_order_id, order_id, ))
 
 
 @receiver(post_save, sender=Order)
