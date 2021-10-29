@@ -21,6 +21,16 @@ class PlainTextNode(relay.Node):
         return global_id.split(':')
 
 
+class Overview(graphene.ObjectType):
+    sale_by_day = graphene.Int()
+    sale_by_month = graphene.Int()
+    sale_by_year = graphene.Int()
+    count_by_day = graphene.Int()
+    count_by_month = graphene.Int()
+    count_by_year = graphene.Int()
+
+
+
 class AffNode(DjangoObjectType):
     class Meta:
         model = Aff
@@ -31,7 +41,7 @@ class AffNode(DjangoObjectType):
     @classmethod
     @login_required
     def get_queryset(cls, queryset, info):
-        super().get_queryset(queryset, info)
+        return queryset
 
 
 class AffUpdateInputType(InputObjectType):

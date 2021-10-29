@@ -117,3 +117,8 @@ class ProductNode(DjangoObjectType):
     @login_required
     def resolve_categories(root, *args, **kwargs):
         return root.categories.all()
+
+
+class TopProduct(graphene.ObjectType):
+    product = graphene.Field(ProductNode)
+    count = graphene.Int()

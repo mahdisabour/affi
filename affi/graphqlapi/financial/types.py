@@ -24,6 +24,7 @@ class TransactionNode(DjangoObjectType):
         model = Transaction
         interfaces = (PlainTextNode, )
         filter_fields = {'id'}
+        exclude_fields = ['related_order', ]
 
     @classmethod
     @login_required

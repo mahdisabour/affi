@@ -21,6 +21,7 @@ class Affiliation(models.Model):
 
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
     base_order_id = models.IntegerField(blank=True, null=True)
     status = models.CharField(
         max_length=50, default="pending")

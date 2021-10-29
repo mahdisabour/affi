@@ -57,5 +57,6 @@ class CategoryNode(DjangoObjectType):
         return root.image
 
 
-
-        
+class TopCategory(graphene.ObjectType):
+    category = graphene.Field(CategoryNode)
+    count = graphene.Int()
