@@ -25,6 +25,15 @@ class PlainTextNode(relay.Node):
         return global_id.split(':')
 
 
+class Overview(graphene.ObjectType):
+    sale_by_day = graphene.Int()
+    sale_by_month = graphene.Int()
+    sale_by_year = graphene.Int()
+    count_by_day = graphene.Int()
+    count_by_month = graphene.Int()
+    count_by_year = graphene.Int()
+    
+
 class ShopNode(DjangoObjectType):
     class Meta:
         model = Shop

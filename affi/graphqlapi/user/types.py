@@ -30,7 +30,6 @@ class Overview(graphene.ObjectType):
     count_by_year = graphene.Int()
 
 
-
 class AffNode(DjangoObjectType):
     class Meta:
         model = Aff

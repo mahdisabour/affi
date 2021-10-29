@@ -29,37 +29,26 @@ class UserQuery(ObjectType):
 
     @login_required
     def resolve_aff_overview(self, info, aff_user_id):
-        affiliator_Tranaction = Transaction.objects.filter(
-            related_order__related_affiliation__affiliator__user__id=aff_user_id
-        )
-
-        affiliator_Transaction_by_day = affiliator_Tranaction.filter(
-            updated_at__range=[
-                timezone.now()-timezone.timedelta(days=1), timezone.now()]
-        )
+        affiliator_Transaction_by_day = Transaction.objects.affiliator_transactions(
+            user_id=aff_user_id, days=1)
         affiliator_Transaction_by_day_amount = affiliator_Transaction_by_day.aggregate(
             Sum('amount'))["amount__sum"]
         day_count = affiliator_Transaction_by_day.values(
             "related_order__related_products").count()
 
-        affiliator_Transaction_by_month = affiliator_Tranaction.filter(
-            updated_at__range=[
-                timezone.now()-timezone.timedelta(days=30), timezone.now()]
-        )
+        affiliator_Transaction_by_month = Transaction.objects.affiliator_transactions(
+            user_id=aff_user_id, days=30)
         affiliator_Transaction_by_month_amount = affiliator_Transaction_by_month.aggregate(
             Sum('amount'))["amount__sum"]
         month_count = affiliator_Transaction_by_month.values(
             "related_order__related_products").count()
 
-        affiliator_Transaction_by_year = affiliator_Tranaction.filter(
-            updated_at__range=[
-                timezone.now()-timezone.timedelta(days=365), timezone.now()]
-        )
+        affiliator_Transaction_by_year = Transaction.objects.affiliator_transactions(
+            user_id=aff_user_id, days=365)
         affiliator_Transaction_by_year_amount = affiliator_Transaction_by_year.aggregate(
             Sum('amount'))["amount__sum"]
         year_count = affiliator_Transaction_by_year.values(
             "related_order__related_products").count()
-
 
         return Overview(
             sale_by_day=affiliator_Transaction_by_day_amount,
@@ -73,7 +62,7 @@ class UserQuery(ObjectType):
     @login_required
     def resolve_aff_top_products(self, info, aff_user_id):
         products = Transaction.objects.filter(
-            related_order__related_affiliation__affiliator__user__id=2).values("related_order__related_products")
+            related_order__related_affiliation__affiliator__user__id=aff_user_id).values("related_order__related_products")
         sorted_by_count_products = products.annotate(count=Count(
             "related_order__related_products")).order_by("-count")
 
@@ -85,7 +74,7 @@ class UserQuery(ObjectType):
     @login_required
     def resolve_aff_top_categories(self, info, aff_user_id):
         categories = Transaction.objects.filter(
-            related_order__related_affiliation__affiliator__user__id=2).values("related_order__related_products__categories")
+            related_order__related_affiliation__affiliator__user__id=aff_user_id).values("related_order__related_products__categories")
         sorted_by_count_categories = categories.annotate(count=Count(
             "related_order__related_products__categories")).order_by("-count")
         result = [

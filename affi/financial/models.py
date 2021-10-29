@@ -1,6 +1,7 @@
 from django.db import models
 
 from . import TransactionState, TransactionType
+from .managers import TransactionManager
 
 
 class Wallet(models.Model):
@@ -14,6 +15,8 @@ class Wallet(models.Model):
 
 
 class Transaction(models.Model):
+    objects = TransactionManager()
+
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
     transaction_date = models.DateTimeField(auto_now=True)
