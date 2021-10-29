@@ -1,4 +1,5 @@
 import graphene
+import graphene_django
 from graphene_file_upload.scalars import Upload
 from graphql_jwt.decorators import login_required
 
@@ -7,8 +8,9 @@ from ..core.types import CreateUserInputType
 from ...core.models import User
 from ...shop.models import Shop, ShopRate
 from ...user.models import Aff
+from ...product.models import Product
 from ..core.types import UserUpdateInputType
-from .types import ShopUpdateInputType
+from .types import ShopUpdateInputType, ProductVisibility
 
 
 class CreateShop(graphene.Mutation):
@@ -105,8 +107,29 @@ class UpdateShopProductsAffiliationRate(graphene.Mutation):
         return UpdateShopProductsAffiliationRate(status="Success")
 
 
+class ShopProductManager(graphene.Mutation):
+    class Arguments:
+        shop_user_id = graphene.Int()
+        products = graphene.List(ProductVisibility)
+
+    status = graphene.String()
+
+    @login_required
+    def mutate(self, info, shop_user_id, products):
+        shop_user = Shop.objects.get(user__id=shop_user_id).user
+        if shop_user != info.context.user:
+            ShopProductManager(status="you have not access")
+        for product in products:
+            product_obj = Product.objects.get(id=product["id"])
+            product_obj.visibility = product["visibility"]
+            product_obj.save()
+        return ShopProductManager(status="Success")
+
+
+
 class ShopMutation(graphene.ObjectType):
     create_shop = CreateShop.Field()
     rate_shop = RateShop.Field()
     update_shop = UpdateShop.Field()
     update_shop_products_affiliation_rate = UpdateShopProductsAffiliationRate.Field()
+    shop_product_manager = ShopProductManager.Field()

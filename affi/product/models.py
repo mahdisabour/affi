@@ -72,6 +72,8 @@ class Review(models.Model):
 
 
 class Product(models.Model):
+    visibility = models.BooleanField(default=True)
+
     base_id = models.PositiveIntegerField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

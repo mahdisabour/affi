@@ -9,6 +9,7 @@ from graphql_jwt.decorators import login_required
 
 from ...shop.models import Shop, ShopRate
 from .filters import ShopFilter
+from ..product.types import ProductNode
 
 
 class PlainTextNode(relay.Node):
@@ -32,6 +33,11 @@ class Overview(graphene.ObjectType):
     count_by_day = graphene.Int()
     count_by_month = graphene.Int()
     count_by_year = graphene.Int()
+
+
+class ProductVisibility(graphene.InputObjectType):
+    id = graphene.Int(required=True)
+    visibility = graphene.Boolean(required=True)
     
 
 class ShopNode(DjangoObjectType):
@@ -47,6 +53,7 @@ class ShopNode(DjangoObjectType):
     # custome Field
     products_count = graphene.Int()
     shop_rate = graphene.Float()
+    all_products = graphene.List(ProductNode)
 
     @classmethod
     @login_required
@@ -56,13 +63,20 @@ class ShopNode(DjangoObjectType):
     @staticmethod
     @login_required
     def resolve_products_count(root, info, **kwargs):
-        return root.products.all().count()
+        return root.products.filter(visibility=True).count()
 
     @staticmethod
     @login_required
     def resolve_shop_rate(root, info, **kwargs):
         rate = ShopRate.objects.filter(shop=root).aggregate(Avg("rate"))
         return rate["rate__avg"]
+
+    @staticmethod
+    @login_required
+    def resolve_all_products(root, info, **kwargs):
+        if info.context.user.role == "AFF":
+            raise Exception("you have not access")
+        return root.products.all()
 
 
 class ShopUpdateInputType(graphene.InputObjectType):

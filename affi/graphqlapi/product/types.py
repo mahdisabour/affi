@@ -79,7 +79,7 @@ class ProductNode(DjangoObjectType):
         interfaces = (PlainTextNode, )
         filterset_class = ProductFilter
         filter_order_by = True
-        # exclude_fields = ["images", ]
+        # exclude_fields = ["visibility", ]
 
     # custom fields
     product_images = graphene.List(ProductImageNode)
@@ -91,7 +91,7 @@ class ProductNode(DjangoObjectType):
     @classmethod
     @login_required
     def get_queryset(cls, queryset, info):
-        return queryset
+        return queryset.filter(visibility=True)
 
     @staticmethod
     @login_required
