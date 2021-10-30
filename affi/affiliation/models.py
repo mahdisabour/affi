@@ -27,7 +27,7 @@ class Order(models.Model):
         max_length=50, default="pending")
     related_affiliation = models.ForeignKey(
         Affiliation, on_delete=models.CASCADE)
-    related_products = models.ManyToManyField("product.Product", blank=True)
+    related_products = models.ManyToManyField("product.Product", blank=True, related_name="orders")
 
     class Meta:
         unique_together = [

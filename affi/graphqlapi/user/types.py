@@ -2,6 +2,7 @@ from graphene import InputObjectType
 import graphene
 from graphene_django import DjangoObjectType
 from graphene import relay, InputObjectType
+import graphene_django
 from graphene_file_upload.scalars import Upload
 from graphql_jwt.decorators import login_required
 

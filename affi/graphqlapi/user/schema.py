@@ -1,4 +1,4 @@
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.db.models import Sum, Count
 
 import graphene
@@ -12,6 +12,7 @@ from .types import (
     Overview
 )
 from ...user.models import Aff
+from ...core.models import User
 from ...financial.models import Transaction
 from ...product.models import Product
 from ...category.models import Category
@@ -21,60 +22,78 @@ from ..category.types import TopCategory
 
 
 class UserQuery(ObjectType):
-    # Aff = PlainTextNode.Field(AffNode)
     all_aff = DjangoFilterConnectionField(AffNode)
-    aff_overview = graphene.Field(Overview, aff_user_id=graphene.Int())
-    aff_top_products = graphene.List(TopProduct, aff_user_id=graphene.Int())
-    aff_top_categories = graphene.List(TopCategory, aff_user_id=graphene.Int())
+    overview = graphene.Field(Overview, user_id=graphene.Int())
+    top_products = graphene.Field(TopProduct, user_id=graphene.Int())
+    top_categories = graphene.List(TopCategory, user_id=graphene.Int())
 
     @login_required
-    def resolve_aff_overview(self, info, aff_user_id):
-        affiliator_Transaction_by_day = Transaction.objects.affiliator_transactions(
-            user_id=aff_user_id, days=1)
-        affiliator_Transaction_by_day_amount = affiliator_Transaction_by_day.aggregate(
-            Sum('amount'))["amount__sum"]
-        day_count = affiliator_Transaction_by_day.values(
-            "related_order__related_products").count()
+    def resolve_overview(self, info, user_id):
+        user = User.objects.get(id=user_id)
+        days = [1, 30, 365]
+        transactions = {}
+        if user.role in ["AFF", "ADMIN"]:
+            transactions = {day: Transaction.objects.affiliator_transactions(
+                user_id=user_id, days=day) for day in days}
+            transactions_amount = {
+                day: transaction.aggregate(
+                    Sum('amount'))["amount__sum"] for day, transaction in transactions.items()
+            }
+            
+        elif user.role in ["SHOP", "ADMIN"]:
+            transactions = {day: Transaction.objects.shop_transactions(
+                user_id=user_id, days=day) for day in days}
+            transactions_amount = {}
+            for day, translation in transactions.items():
+                print(day)
+                print(translation)
+                price = Transaction.objects.shop_products_price(user_id=user_id, days=day)
+                price_affiliate = translation.aggregate(Sum('amount'))["amount__sum"]
+                if price or price_affiliate:
+                    transactions_amount[day] = price - price_affiliate
+                else:
+                    transactions_amount[day] = 0
 
-        affiliator_Transaction_by_month = Transaction.objects.affiliator_transactions(
-            user_id=aff_user_id, days=30)
-        affiliator_Transaction_by_month_amount = affiliator_Transaction_by_month.aggregate(
-            Sum('amount'))["amount__sum"]
-        month_count = affiliator_Transaction_by_month.values(
-            "related_order__related_products").count()
-
-        affiliator_Transaction_by_year = Transaction.objects.affiliator_transactions(
-            user_id=aff_user_id, days=365)
-        affiliator_Transaction_by_year_amount = affiliator_Transaction_by_year.aggregate(
-            Sum('amount'))["amount__sum"]
-        year_count = affiliator_Transaction_by_year.values(
-            "related_order__related_products").count()
+        transactions_count = {day: transaction.values(
+            "related_order__related_products").count() for day, transaction in transactions.items()}
 
         return Overview(
-            sale_by_day=affiliator_Transaction_by_day_amount,
-            sale_by_month=affiliator_Transaction_by_month_amount,
-            sale_by_year=affiliator_Transaction_by_year_amount,
-            count_by_day=day_count,
-            count_by_month=month_count,
-            count_by_year=year_count,
+            sale_by_day=transactions_amount[1] if transactions_amount[1] else 0,
+            sale_by_month=transactions_amount[30] if transactions_amount[30] else 0,
+            sale_by_year=transactions_amount[365] if transactions_amount[365] else 0,
+            count_by_day=transactions_count[1] if transactions_count[1] else 0,
+            count_by_month=transactions_count[30] if transactions_count[30] else 0,
+            count_by_year=transactions_count[365] if transactions_count[365] else 0,
         )
 
     @login_required
-    def resolve_aff_top_products(self, info, aff_user_id):
-        products = Transaction.objects.filter(
-            related_order__related_affiliation__affiliator__user__id=aff_user_id).values("related_order__related_products")
-        sorted_by_count_products = products.annotate(count=Count(
-            "related_order__related_products")).order_by("-count")
+    def resolve_top_products(self, info, user_id):
+        user = User.objects.get(id=user_id)
 
-        result = [
-            TopProduct(Product.objects.get(id=item["related_order__related_products"]), item["count"]) for item in sorted_by_count_products
-        ]
-        return result
+        if user.role in ["AFF", "ADMIN"]:
+            aff_products = Transaction.objects.aff_products(user_id=user_id)
+            products_detail = aff_products.annotate(count=Count("id"), sum=Sum("price")).order_by("-count")
+            amount = [int(product.sum * product.affiliate_rate / 100) for product in products_detail]
+        if user.role in ["SHOP", "ADMIN"]:
+            shop_products = Transaction.objects.shop_products(user_id=user_id)
+            products_detail = shop_products.annotate(count=Count("id"), sum=Sum("price")).order_by("-count")
+            amount = [product.sum - int(product.sum * product.affiliate_rate / 100) for product in products_detail]
+
+        name = [product.name for product in products_detail]
+        count = [product.count for product in products_detail]
+        values=[[_count, _amount] for _count, _amount in zip(count, amount)]
+
+        return TopProduct(
+            labels=name,
+            values=values
+        )
+
+
 
     @login_required
-    def resolve_aff_top_categories(self, info, aff_user_id):
+    def resolve_top_categories(self, info, user_id):
         categories = Transaction.objects.filter(
-            related_order__related_affiliation__affiliator__user__id=aff_user_id).values("related_order__related_products__categories")
+            related_order__related_affiliation__affiliator__user__id=user_id).values("related_order__related_products__categories")
         sorted_by_count_categories = categories.annotate(count=Count(
             "related_order__related_products__categories")).order_by("-count")
         result = [

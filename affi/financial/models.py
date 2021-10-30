@@ -26,7 +26,7 @@ class Transaction(models.Model):
         Wallet, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=0)
     related_order = models.OneToOneField(
-        "affiliation.Order", on_delete=models.CASCADE, null=True, blank=True)
+        "affiliation.Order", on_delete=models.CASCADE, null=True, blank=True, related_name="transactions")
     transaction_state = models.CharField(
         max_length=50, choices=TransactionState.CHOICES, default=TransactionState.PENDING)
 

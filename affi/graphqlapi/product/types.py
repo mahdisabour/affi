@@ -120,5 +120,5 @@ class ProductNode(DjangoObjectType):
 
 
 class TopProduct(graphene.ObjectType):
-    product = graphene.Field(ProductNode)
-    count = graphene.Int()
+    labels = graphene.List(graphene.String)
+    values = graphene.List(graphene.List(graphene.Int))
