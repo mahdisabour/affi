@@ -124,7 +124,7 @@ class Product(models.Model):
     cross_sell_ids = models.ManyToManyField("self", blank=True)
     parent_id = models.IntegerField(blank=True, null=True)
     purchase_note = models.CharField(max_length=100, blank=True)
-    categories = models.ManyToManyField("category.Category", blank=True)
+    categories = models.ManyToManyField("category.Category", blank=True, related_name="products")
     tags = models.ManyToManyField("product.Tag", blank=True)
     menu_order = models.IntegerField(blank=True, null=True)
     affiliate_rate = models.FloatField(

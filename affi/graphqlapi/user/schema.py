@@ -25,11 +25,11 @@ class UserQuery(ObjectType):
     all_aff = DjangoFilterConnectionField(AffNode)
     overview = graphene.Field(Overview, user_id=graphene.Int())
     top_products = graphene.Field(TopProduct, user_id=graphene.Int())
-    top_categories = graphene.List(TopCategory, user_id=graphene.Int())
+    top_categories = graphene.Field(TopCategory, user_id=graphene.Int())
 
     @login_required
     def resolve_overview(self, info, user_id):
-        user = User.objects.get(id=user_id)
+        user = info.context.user
         days = [1, 30, 365]
         transactions = {}
         if user.role in ["AFF", "ADMIN"]:
@@ -39,7 +39,7 @@ class UserQuery(ObjectType):
                 day: transaction.aggregate(
                     Sum('amount'))["amount__sum"] for day, transaction in transactions.items()
             }
-            
+
         elif user.role in ["SHOP", "ADMIN"]:
             transactions = {day: Transaction.objects.shop_transactions(
                 user_id=user_id, days=day) for day in days}
@@ -47,8 +47,10 @@ class UserQuery(ObjectType):
             for day, translation in transactions.items():
                 print(day)
                 print(translation)
-                price = Transaction.objects.shop_products_price(user_id=user_id, days=day)
-                price_affiliate = translation.aggregate(Sum('amount'))["amount__sum"]
+                price = Transaction.objects.shop_products_price(
+                    user_id=user_id, days=day)
+                price_affiliate = translation.aggregate(Sum('amount'))[
+                    "amount__sum"]
                 if price or price_affiliate:
                     transactions_amount[day] = price - price_affiliate
                 else:
@@ -72,16 +74,20 @@ class UserQuery(ObjectType):
 
         if user.role in ["AFF", "ADMIN"]:
             aff_products = Transaction.objects.aff_products(user_id=user_id)
-            products_detail = aff_products.annotate(count=Count("id"), sum=Sum("price")).order_by("-count")
-            amount = [int(product.sum * product.affiliate_rate / 100) for product in products_detail]
+            products_detail = aff_products.annotate(
+                count=Count("id"), sum=Sum("price")).order_by("-count")
+            amount = [int(product.sum * product.affiliate_rate / 100)
+                      for product in products_detail]
         if user.role in ["SHOP", "ADMIN"]:
             shop_products = Transaction.objects.shop_products(user_id=user_id)
-            products_detail = shop_products.annotate(count=Count("id"), sum=Sum("price")).order_by("-count")
-            amount = [product.sum - int(product.sum * product.affiliate_rate / 100) for product in products_detail]
+            products_detail = shop_products.annotate(
+                count=Count("id"), sum=Sum("price")).order_by("-count")
+            amount = [product.sum - int(product.sum * product.affiliate_rate / 100)
+                      for product in products_detail]
 
         name = [product.name for product in products_detail]
         count = [product.count for product in products_detail]
-        values=[[_count, _amount] for _count, _amount in zip(count, amount)]
+        values = [[_count, _amount] for _count, _amount in zip(count, amount)]
 
         return TopProduct(
             labels=name,
@@ -89,14 +95,29 @@ class UserQuery(ObjectType):
         )
 
 
-
     @login_required
     def resolve_top_categories(self, info, user_id):
-        categories = Transaction.objects.filter(
-            related_order__related_affiliation__affiliator__user__id=user_id).values("related_order__related_products__categories")
-        sorted_by_count_categories = categories.annotate(count=Count(
+        user = User.objects.get(id=user_id)
+
+        if user.role in ["AFF", "ADMIN"]:
+            categories = Transaction.objects.filter(
+                related_order__related_affiliation__affiliator__user__id=user_id).values("related_order__related_products__categories")
+
+        if user.role in ["SHOP", "ADMIN"]:
+            categories = Transaction.objects.filter(
+                related_order__related_affiliation__related_shop__user__id=user_id).values("related_order__related_products__categories")
+        
+        # categories_detail = categories.annotate(count=Count(
+        #     "related_order__related_products__categories"), shop_profit=Sum("related_order__related_products__price"), amount=Sum("amount")).order_by("-count")
+        
+        categories_detail = categories.annotate(count=Count(
             "related_order__related_products__categories")).order_by("-count")
-        result = [
-            TopCategory(Category.objects.get(id=item["related_order__related_products__categories"]), item["count"]) for item in sorted_by_count_categories
-        ]
-        return result
+
+        labels = [Category.objects.get(id=item["related_order__related_products__categories"]).name for item in categories_detail]
+        values = [[item["count"]] for item in categories_detail]
+
+
+        return TopCategory(
+            labels=labels, 
+            values=values
+        )

@@ -2,6 +2,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 from graphene import relay
+import graphene_django
 from graphql_jwt.decorators import login_required
 
 from ...category.models import Category, Image
@@ -58,5 +59,5 @@ class CategoryNode(DjangoObjectType):
 
 
 class TopCategory(graphene.ObjectType):
-    category = graphene.Field(CategoryNode)
-    count = graphene.Int()
+    labels = graphene.List(graphene.String)
+    values = graphene.List(graphene.List(graphene.Int))

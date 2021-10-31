@@ -3,6 +3,7 @@ from django.contrib.auth.models import BaseUserManager
 from django.db.models import Sum
 
 from ..product.models import Product
+from ..category.models import Category
 
 
 class TransactionManager(BaseUserManager):
@@ -49,3 +50,13 @@ class TransactionManager(BaseUserManager):
             orders__transactions__related_order__related_affiliation__affiliator__user__id=user_id
         )
         return result
+
+    def shop_categories(self, user_id):
+        Category.objects.filter(
+            related_shop__user__id=user_id
+        )
+
+    def aff_categories(self, user_id):
+        Category.objects.filter(
+            products__orders__transactions__related_order__related_affiliation__affiliator__user__id=user_id
+        )
