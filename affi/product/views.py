@@ -14,6 +14,8 @@ def woocommerce_update_product(request):
     try:
         data = json.loads(request.body)
         header = request.META
+        print(header)
+        print(type(header))
         shop_url = header["x-wc-webhook-source"]
         shop_objects = Shop.objects.get(url=shop_url)
 
