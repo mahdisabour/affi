@@ -23,9 +23,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 # from .graphql.views import GraphQLView
 
+from .product.views import woocommerce_update_product
 
 
 urlpatterns = [
     url(r"^graphql/$", csrf_exempt(GraphQLView.as_view(schema=schema, graphiql=True)), name="api"),
     path('admin/', admin.site.urls),
+    path("woocommerce_update_product/", woocommerce_update_product, name="woocommerce_update_product")
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,4 +1,3 @@
-from django.utils import timezone, translation
 from django.db.models import Sum, Count
 
 import graphene
@@ -94,7 +93,6 @@ class UserQuery(ObjectType):
             values=values
         )
 
-
     @login_required
     def resolve_top_categories(self, info, user_id):
         user = User.objects.get(id=user_id)
@@ -106,18 +104,18 @@ class UserQuery(ObjectType):
         if user.role in ["SHOP", "ADMIN"]:
             categories = Transaction.objects.filter(
                 related_order__related_affiliation__related_shop__user__id=user_id).values("related_order__related_products__categories")
-        
+
         # categories_detail = categories.annotate(count=Count(
         #     "related_order__related_products__categories"), shop_profit=Sum("related_order__related_products__price"), amount=Sum("amount")).order_by("-count")
-        
+
         categories_detail = categories.annotate(count=Count(
             "related_order__related_products__categories")).order_by("-count")
 
-        labels = [Category.objects.get(id=item["related_order__related_products__categories"]).name for item in categories_detail]
+        labels = [Category.objects.get(
+            id=item["related_order__related_products__categories"]).name for item in categories_detail]
         values = [[item["count"]] for item in categories_detail]
 
-
         return TopCategory(
-            labels=labels, 
+            labels=labels,
             values=values
         )

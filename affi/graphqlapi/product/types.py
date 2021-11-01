@@ -91,7 +91,7 @@ class ProductNode(DjangoObjectType):
     @classmethod
     @login_required
     def get_queryset(cls, queryset, info):
-        return queryset.filter(visibility=True)
+        return queryset.filter(visibility=True, stock_status="instock")
 
     @staticmethod
     @login_required
