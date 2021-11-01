@@ -27,8 +27,10 @@ class WooCommerceHandler:
         products = self.wcapi.get("products", params={'per_page': 100}).json()
         for product in products:
             extracted_data = self.extract_product_data(product)
+            price = int(extracted_data["price"])
+            del extracted_data["price"]
             product_obj = Product.objects.create(
-                related_shop=self.shop, base_id=product["id"], **extracted_data)
+                related_shop=self.shop, base_id=product["id"], price=price, **extracted_data)
             if product["images"]:
                 for image in product["images"]:
                     image_extracted_data = self.extract_image_data(
