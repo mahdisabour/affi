@@ -27,6 +27,7 @@ def woocommerce_update_product(request):
         product_object.price = price 
         product_object.stock_status = stock_status
         product_object.save()
+        return HttpResponse(status=200)
         
 
     except Exception as e:
