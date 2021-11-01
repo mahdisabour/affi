@@ -14,8 +14,6 @@ def woocommerce_update_product(request):
     try:
         data = json.loads(request.body)
         header = request.META
-        print(header)
-        print(type(header))
         shop_url = header["HTTP_X_WC_WEBHOOK_SOURCE"]
         shop_objects = Shop.objects.get(url=shop_url)
 
@@ -28,7 +26,6 @@ def woocommerce_update_product(request):
         product_object.stock_status = stock_status
         product_object.save()
         return HttpResponse(status=200)
-        
 
     except Exception as e:
         print(e)
