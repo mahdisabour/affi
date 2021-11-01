@@ -41,7 +41,7 @@ class WooCommerceHandler:
             # save product category
             if product["categories"]:
                 for category in product["categories"]:
-                    cat_obj = Category.objects.get(base_id=category["id"])
+                    cat_obj = Category.objects.get(base_id=category["id"], related_shop=self.shop)
                     product_obj.categories.add(cat_obj)
 
 
