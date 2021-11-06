@@ -6,7 +6,7 @@ from .managers import TransactionManager
 
 class Wallet(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
-    amount = models.PositiveBigIntegerField(default=0)
+    amount = models.BigIntegerField(default=0)
     bank_account_name = models.CharField(max_length=100, blank=True, null=True)
     bank_account_number = models.CharField(
         max_length=100, blank=True, null=True)
@@ -29,6 +29,7 @@ class Transaction(models.Model):
         "affiliation.Order", on_delete=models.CASCADE, null=True, blank=True, related_name="transactions")
     transaction_state = models.CharField(
         max_length=50, choices=TransactionState.CHOICES, default=TransactionState.PENDING)
+    is_staff = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.pk:

@@ -5,7 +5,9 @@ from woocommerce import API
 from ..celery import app
 from ..shop.models import Shop
 from ..product.models import Product
+from ..shop.models import Shop
 from ..affiliation.models import Order
+
 
 @app.task
 def get_products_by_order(shop_id, base_order_id, order_id):
@@ -32,5 +34,28 @@ def get_products_by_order(shop_id, base_order_id, order_id):
     related_order.related_products.add(*products)
     related_order.save()
 
+
+@app.task
+def check_order_status():
+    shops = Shop.objects.all()
+    for shop in shops:
+        wcapi = API(
+            url=shop.url,  # Your store URL
+            consumer_key=shop.api_cunsumer_key,  # Your consumer key
+            consumer_secret=shop.api_secret_key,  # Your consumer secret
+            wp_api=True,  # Enable the WP REST API integration
+            version="wc/v3",  # WooCommerce WP REST API version
+            timeout=10
+        )
+        orders = shop.pending_orders()
+        for order in orders:
+            try:
+                base_order_id = order.base_order_id
+                data = wcapi.get(f"orders/{base_order_id}").json()
+                status = data["stauts"]
+                order.status = status
+                order.save()
+            except:
+                pass
 
     

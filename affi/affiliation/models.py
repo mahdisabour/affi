@@ -24,7 +24,7 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     base_order_id = models.IntegerField(blank=True, null=True)
     status = models.CharField(
-        max_length=50, default="pending")
+        max_length=50, choices=OrderStatus.CHOICES, default=OrderStatus.PENDING)
     related_affiliation = models.ForeignKey(
         Affiliation, on_delete=models.CASCADE)
     related_products = models.ManyToManyField("product.Product", blank=True, related_name="orders")
@@ -36,4 +36,3 @@ class Order(models.Model):
 
     # def __str__(self) -> str:
     #     return f"{self.related_affiliation.related_shop.user.name}"
-

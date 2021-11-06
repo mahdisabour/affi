@@ -134,7 +134,7 @@ class Product(models.Model):
 
     class Meta:
         unique_together = [
-            ['id', 'related_shop']
+            ['base_id', 'related_shop']
         ]
 
     def __str__(self) -> str:

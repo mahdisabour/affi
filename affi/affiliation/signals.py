@@ -22,7 +22,6 @@ def create_affiliation_url(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Order)
 def get_order_products(sender, instance, created, **kwargs):
     if created:
-        print("get_order_products created")
         order_id = instance.id
         shop_id = instance.related_affiliation.related_shop.id
         base_order_id = instance.base_order_id
@@ -32,8 +31,7 @@ def get_order_products(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Order)
 def create_transaction(sender, instance, created, **kwargs):
     if not created:
-        if instance.status == "completed":
-            print("create transaction not created")
+        if instance.status in ["completed", "processing"]:
             shop_user = instance.related_affiliation.related_shop.user
             aff_user = instance.related_affiliation.affiliator.user
             Transaction.objects.create(

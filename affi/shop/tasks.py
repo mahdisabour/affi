@@ -23,8 +23,7 @@ class WooCommerceHandler:
             timeout=10
         )
 
-    def get_products(self):
-        products = self.wcapi.get("products", params={'per_page': 100}).json()
+    def get_products(self, products):
         for product in products:
             extracted_data = self.extract_product_data(product)
             price = int(extracted_data["price"])
@@ -43,7 +42,6 @@ class WooCommerceHandler:
                 for category in product["categories"]:
                     cat_obj = Category.objects.get(base_id=category["id"], related_shop=self.shop)
                     product_obj.categories.add(cat_obj)
-
 
 
     def extract_product_data(self, json):
@@ -109,7 +107,8 @@ class WooCommerceHandler:
 
     def run(self):
         self.get_categories()
-        self.get_products()
+        products = self.wcapi.get("products", params={'per_page': 100}).json()
+        self.get_products(products)
         self.shop.data_ready = True
         self.shop.save()
 

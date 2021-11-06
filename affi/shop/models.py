@@ -6,7 +6,7 @@ from ..core.models import User
 from ..shop.tasks import woocommerece_handler
 from . import ShopType
 from .managers import ShopManager
-
+from ..affiliation.models import Order
 
 
 class Shop(models.Model):
@@ -31,6 +31,9 @@ class Shop(models.Model):
         elif self.is_staff and not self.data_ready and self.api_cunsumer_key and self.api_secret_key:
             woocommerece_handler.apply_async((self.pk, ))
         return super(Shop, self).save(*args, **kwargs)
+
+    def pending_orders(self, *args, **kwargs):
+        return Order.objects.filter(related_affiliation__related_shop=self, status="pending")
 
 
 class ShopRate(models.Model):

@@ -11,9 +11,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 
-from datetime import timedelta
+from .celery import app
+from celery.schedules import crontab
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -200,10 +202,19 @@ CHANNEL_LAYERS = {
 
 
 # redis config
-# REDIS related settings 
+# REDIS related settings
 REDIS_HOST = 'redis'
 REDIS_PORT = '6379'
 BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
-BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600} 
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+
+
+app.conf.beat_schedule = {
+    'chech-expire-every-day': {
+        'task': 'affi.shop.tasks.check_order_status',
+        'schedule': crontab(minute=0, hour=0),
+        'args': ()
+    },
+}
