@@ -30,4 +30,4 @@ RUN pip install -r requirements.txt
 # RUN pip install psycopg2
 
 COPY . $APP_HOME
-RUN chmod +x celery.sh
+RUN chmod +x ./celery.sh
