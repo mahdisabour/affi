@@ -45,7 +45,7 @@ services:
         build:
             context: ./
             dockerfile: Dockerfile.dev
-        command: /bin/sh -c "celery.sh"
+        command: /bin/sh -c "./celery.sh"
         volumes:
             - ./mediafiles:/home/app/web/mediafiles
             - .:/home/app/web
