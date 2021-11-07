@@ -45,7 +45,7 @@ services:
         build:
             context: ./
             dockerfile: Dockerfile.dev
-        command: /bin/sh "celery.sh"
+        command: celery -A affi worker --loglevel=debug --concurrency=8 
         volumes:
             - ./mediafiles:/home/app/web/mediafiles
             - .:/home/app/web
@@ -55,19 +55,19 @@ services:
             - ./.env.dev
 
 
-    # celery-beat:
-    #     restart: always
-    #     build: 
-    #         context: ./
-    #         dockerfile: Dockerfile.dev
-    #     command: celery -A affi beat -l info
-    #     depends_on:
-    #         - redis
-    #     volumes:
-    #         - celery_data:/var/lib/celery/data/
-    #         - .:/home/app/web
-    #     env_file:
-    #         - ./.env.dev
+    celery-beat:
+        restart: always
+        build: 
+            context: ./
+            dockerfile: Dockerfile.dev
+        command: celery -A affi beat -l debug
+        depends_on:
+            - redis
+        volumes:
+            - celery_data:/var/lib/celery/data/
+            - .:/home/app/web
+        env_file:
+            - ./.env.dev
         
             
     nginx:
