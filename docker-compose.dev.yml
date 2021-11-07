@@ -58,13 +58,14 @@ services:
     celery-beat:
         restart: always
         build: 
-          context: ./
+            context: ./
+            dockerfile: Dockerfile.dev
         command: celery -A bot beat -l info
         depends_on:
-          - redis
+            - redis
         volumes:
-          - celery_data:/var/lib/celery/data/
-          - .:/home/app/web
+            - celery_data:/var/lib/celery/data/
+            - .:/home/app/web
         env_file:
             - ./.env.dev
         
