@@ -54,7 +54,21 @@ services:
         env_file:
             - ./.env.dev
 
-    
+
+    celery-beat:
+        restart: always
+        build: 
+          context: ./
+        command: celery -A bot beat -l info
+        depends_on:
+          - redis
+        volumes:
+          - celery_data:/var/lib/celery/data/
+          - .:/home/app/web
+        env_file:
+            - ./.env.dev
+        
+            
     nginx:
         build:
             context: ./nginx/
@@ -90,3 +104,4 @@ volumes:
     static_volume:
     media_files:
     postgres_data:
+    celery_data:
