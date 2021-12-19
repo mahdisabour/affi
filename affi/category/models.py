@@ -24,7 +24,7 @@ class Category(models.Model):
 
     class Meta:
         unique_together = [
-            ['base_id', 'related_shop']
+            ['base_id', 'related_shop', 'slug']
         ]
 
 
