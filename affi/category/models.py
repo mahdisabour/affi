@@ -8,7 +8,7 @@ from mptt.managers import TreeManager
 class Category(models.Model):
     base_id = models.PositiveIntegerField(blank=True, null=True)
     name = models.CharField(max_length=250)
-    slug = models.SlugField(max_length=255, unique=True,
+    slug = models.SlugField(max_length=255, unique=False,
                             allow_unicode=True, blank=True)
     description = models.TextField(blank=True, null=True)
     parent = models.IntegerField(blank=True, null=True)
