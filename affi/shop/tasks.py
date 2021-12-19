@@ -20,7 +20,7 @@ class WooCommerceHandler:
             consumer_secret=self.shop.api_secret_key,  # Your consumer secret
             wp_api=True,  # Enable the WP REST API integration
             version="wc/v3",  # WooCommerce WP REST API version
-            timeout=10
+            timeout=25
         )
 
     def get_products(self, products):

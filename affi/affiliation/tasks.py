@@ -18,7 +18,7 @@ def get_products_by_order(shop_id, base_order_id, order_id):
         consumer_secret=shop.api_secret_key,  # Your consumer secret
         wp_api=True,  # Enable the WP REST API integration
         version="wc/v3",  # WooCommerce WP REST API version
-        timeout=10
+        timeout=25
     )
     try:
         data = wcapi.get(f"orders/{base_order_id}").json()
@@ -45,7 +45,7 @@ def check_order_status():
             consumer_secret=shop.api_secret_key,  # Your consumer secret
             wp_api=True,  # Enable the WP REST API integration
             version="wc/v3",  # WooCommerce WP REST API version
-            timeout=10
+            timeout=25
         )
         orders = shop.pending_orders()
         for order in orders:
