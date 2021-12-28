@@ -38,7 +38,7 @@ class Overview(graphene.ObjectType):
 class ProductVisibility(graphene.InputObjectType):
     id = graphene.Int(required=True)
     visibility = graphene.Boolean(required=True)
-    
+
 
 class ShopNode(DjangoObjectType):
     class Meta:

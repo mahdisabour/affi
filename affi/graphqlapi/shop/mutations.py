@@ -126,6 +126,23 @@ class ShopProductManager(graphene.Mutation):
         return ShopProductManager(status="Success")
 
 
+class GetShopKeys(graphene.Mutation):
+    class Arguments:
+        api_consumer_key = graphene.String()
+        api_secret_key = graphene.String()
+
+    status = graphene.String()
+
+    @login_required
+    def mutate(self, info, api_consumer_key, api_secret_key):
+        shop = Shop.objects.get(user=info.context.user)
+        if not shop:
+            return GetShopKeys(status="you have not access")
+        shop.api_consumer_key = api_consumer_key
+        shop.api_secret_key = api_secret_key
+        shop.save()
+        return GetShopKeys(status="Success")
+
 
 class ShopMutation(graphene.ObjectType):
     create_shop = CreateShop.Field()
@@ -133,3 +150,4 @@ class ShopMutation(graphene.ObjectType):
     update_shop = UpdateShop.Field()
     update_shop_products_affiliation_rate = UpdateShopProductsAffiliationRate.Field()
     shop_product_manager = ShopProductManager.Field()
+    get_shop_keys = GetShopKeys.Field()
